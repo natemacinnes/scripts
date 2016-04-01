@@ -20,14 +20,12 @@ fi
 echo Swapping hosts files...
 if [ -f /etc/hosts_blk.txt ]; then
 	echo Reverting file back to default...
-	mv /etc/hosts /etc/hosts.blk
-	mv /etc/hosts.bk /etc/hosts
+	cp /etc/hosts.bk /etc/hosts
 	rm /etc/hosts_blk.txt
      	echo Hosts file now default.    	
 else
 	echo Turning on hosts firewall...
- 	mv /etc/hosts /etc/hosts.bk
- 	mv /etc/hosts.blk /etc/hosts
+ 	cp /etc/hosts.blk /etc/hosts
 	touch /etc/hosts_blk.txt
 	echo Host file now blocking.
 fi
