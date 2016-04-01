@@ -1,0 +1,33 @@
+#! /bin/bash
+if [ "$1" == "update" ]; then
+	if [ -e /etc/hosts.blk.master ]; then
+		echo Checking for new hosts firewall file...
+		lastdate=`stat -f "%Sm" -t "%a, %d %b %Y %H:%M:%S %Z" /etc/hosts.blk.master`
+		modified=`curl -sS -I --header 'If-Modified-Since: $lastdate' http://winhelp2002.mvps.org/hosts.txt`
+		if [[ $modified == *"200 OK"* ]]; then
+			curl -z "$lastdate" -o /etc/hosts.blk.master http://winhelp2002.mvps.org/hosts.txt
+			cp /etc/hosts.blk.master /etc/hosts.blk
+			echo Firewall hosts file updated.
+		else
+			echo Current hosts firewall file up-to-date.
+		fi
+	else
+		echo Downloading hosts firewall file
+	        curl -o /etc/hosts.blk.master http://winhelp2002.mvps.org/hosts.txt
+		cp /etc/hosts.blk.master /etc/hosts.blk
+	fi
+fi  
+echo Swapping hosts files...
+if [ -f /etc/hosts_blk.txt ]; then
+	echo Reverting file back to default...
+	mv /etc/hosts /etc/hosts.blk
+	mv /etc/hosts.bk /etc/hosts
+	rm /etc/hosts_blk.txt
+     	echo Hosts file now default.    	
+else
+	echo Turning on hosts firewall...
+ 	mv /etc/hosts /etc/hosts.bk
+ 	mv /etc/hosts.blk /etc/hosts
+	touch /etc/hosts_blk.txt
+	echo Host file now blocking.
+fi
